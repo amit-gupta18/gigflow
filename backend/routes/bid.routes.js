@@ -1,15 +1,16 @@
 const express = require("express");
 const bidRouter = express.Router();
 const { createBid, getBids, hireBid } = require("../controllers/bid.controller");
+const authmiddleware = require("../middlewares/auth.middleware");
 
 // submit a bid for a gig
-bidRouter.post("/" , createBid)
+bidRouter.post("/" , authmiddleware , createBid)
 
 // get all bids for a gig
-bidRouter.get("/:gigId" , getBids) // authenticated with user/owner  only 
+bidRouter.get("/:gigId" , authmiddleware , getBids) // authenticated with user/owner  only 
 
 // patch for hiring , atomic update , hire logic 
-bidRouter.patch("/:bidId/hire" , hireBid)
+bidRouter.patch("/:bidId/hire" , authmiddleware , hireBid)
 
 
 module.exports = bidRouter;

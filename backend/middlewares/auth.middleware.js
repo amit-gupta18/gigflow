@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 function middleware(req , res , next){
     const token = req.cookies.token.split(" ")[1];
+    // console.log("token in middlware " , token);
     if(!token){
         return res.status(401).json({message : "Unauthorized"})
     }
