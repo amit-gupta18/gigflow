@@ -17,7 +17,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'https://gigflow-amit.vercel.app'
+        'https://gigflow-amit.vercel.app',
     ],
     credentials: true
 }));

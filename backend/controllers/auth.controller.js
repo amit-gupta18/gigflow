@@ -17,7 +17,8 @@ async function register(req, res) {
     // console.log("token from register controller" , token)
     res.cookie("token", token, {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none',
+        secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
     return res.status(201).json({
@@ -43,7 +44,8 @@ async function login(req, res) {
     // console.log("token from login controller" , token)
     res.cookie("token", token, {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none',
+        secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
     res.json({
