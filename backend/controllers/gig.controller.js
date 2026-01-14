@@ -13,12 +13,12 @@ async function fetchAllGigs(req , res){
 // creating a new gig 
 async function createGig(req , res){
     // title  , desc , budget , ownerId , status ( open by default || assigned)
-    const {title , description , budget , ownerId} = req.body;
+    const {title , description , budget} = req.body;
     const gig = await Gig.create({
         title , 
         description , 
         budget , 
-        ownerId , 
+        ownerId: req.userId, // Use authenticated user's ID from middleware
         status : "open"
     })
 

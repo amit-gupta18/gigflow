@@ -73,7 +73,14 @@ const ViewGig = () => {
     if (error) return <div className="text-center mt-10 text-red-500">Error: {error}</div>;
     if (!currentGig) return <div className="text-center mt-10 text-red-500">Gig information not found</div>;
 
-    const isOwner = user && currentGig.ownerId === user.id;
+    const isOwner = user && currentGig.ownerId && String(currentGig.ownerId) === String(user.id);
+    
+    console.log('Owner check:', { 
+        userId: user?.id, 
+        gigOwnerId: currentGig?.ownerId, 
+        isOwner,
+        gigStatus: currentGig?.status 
+    });
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

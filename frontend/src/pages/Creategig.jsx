@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +10,7 @@ const CreateGig = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,7 +22,7 @@ const CreateGig = () => {
             await axiosClient.post("/gigs", { 
                 title, 
                 description, 
-                budget: Number(budget) 
+                budget: Number(budget)
             });
             navigate("/dashboard");
         } catch (err) {
@@ -87,11 +89,11 @@ const CreateGig = () => {
                         Cancel
                     </button>
                     <button
+                        type="submit"
                         disabled={loading}
                         className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
                     >
                         {loading ? "Posting..." : "Post Gig"}
-                        Post Gig
                     </button>
                 </div>
             </form>
