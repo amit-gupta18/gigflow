@@ -27,6 +27,7 @@ const GigCard = ({ gig }) => {
                 <div className="mt-4">
                     <Link
                         to={`/gig/${gig._id}`}
+                        state={{ gig }}
                         className="text-indigo-600 hover:text-indigo-900 font-medium text-sm"
                     >
                         View Details &rarr;

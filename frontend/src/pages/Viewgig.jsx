@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 
 const ViewGig = () => {
     const { id } = useParams();
+    const location = useLocation();
     const { user } = useSelector((state) => state.auth);
 
-    const [currentGig, setCurrentGig] = useState(null);
+    const [currentGig, setCurrentGig] = useState(location.state?.gig || null);
     const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -21,14 +22,13 @@ const ViewGig = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const [gigResponse, bidsResponse] = await Promise.all([
-                    // axiosClient.get(`/gigs/${id}`),
-                    axiosClient.get(`/bids/${id}`)
-                ]);
-                setCurrentGig(gigResponse.data);
+                
+                const bidsResponse = await axiosClient.get(`/bids/${id}`);
                 setBids(bidsResponse.data);
+                console.log("bids response : ", bidsResponse.data);
             } catch (err) {
-                setError(err.response?.data?.message || "Failed to fetch gig details");
+                console.error("Error fetching bids:", err);
+                setError(err.response?.data?.message || "Failed to fetch bid details");
             } finally {
                 setLoading(false);
             }
@@ -61,22 +61,19 @@ const ViewGig = () => {
     const handleHire = async (bidId) => {
         try {
             await axiosClient.patch(`/bids/${bidId}/hire`);
-            // Re-fetch gig and bids to update status
-            const [gigResponse, bidsResponse] = await Promise.all([
-                axiosClient.get(`/gigs/${id}`),
-                axiosClient.get(`/bids/${id}`)
-            ]);
-            setCurrentGig(gigResponse.data);
+            // Re-fetch bids to update status
+            const bidsResponse = await axiosClient.get(`/bids/${id}`);
             setBids(bidsResponse.data);
         } catch (err) {
             alert(err.response?.data?.message || "Failed to hire bidder");
         }
     };
 
-    if (loading || !currentGig) return <div className="text-center mt-10">Loading gig details...</div>;
+    if (loading) return <div className="text-center mt-10">Loading bids...</div>;
     if (error) return <div className="text-center mt-10 text-red-500">Error: {error}</div>;
+    if (!currentGig) return <div className="text-center mt-10 text-red-500">Gig information not found</div>;
 
-    const isOwner = user && currentGig.userId === user.id;
+    const isOwner = user && currentGig.ownerId === user.id;
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
