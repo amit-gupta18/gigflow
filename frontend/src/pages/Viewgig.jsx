@@ -69,6 +69,17 @@ const ViewGig = () => {
         }
     };
 
+    const handleReject = async (bidId) => {
+        try {
+            await axiosClient.patch(`/bids/${bidId}/reject`);
+            // Re-fetch bids to update status
+            const bidsResponse = await axiosClient.get(`/bids/${id}`);
+            setBids(bidsResponse.data);
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to reject bid");
+        }
+    };
+
     if (loading) return <div className="text-center mt-10">Loading bids...</div>;
     if (error) return <div className="text-center mt-10 text-red-500">Error: {error}</div>;
     if (!currentGig) return <div className="text-center mt-10 text-red-500">Gig information not found</div>;
@@ -137,14 +148,22 @@ const ViewGig = () => {
                                         </span>
                                     </div>
                                 </div>
-                                {isOwner && currentGig.status === 'open' && (
+                                {isOwner && currentGig.status === 'open' && bid.status !== 'hired' && bid.status !== 'rejected' && (
                                     <div className="-mt-px flex divide-x divide-gray-200">
                                         <div className="w-0 flex-1 flex">
                                             <button
                                                 onClick={() => handleHire(bid._id)}
-                                                className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
+                                                className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-green-700 font-medium border border-transparent hover:bg-green-50"
                                             >
                                                 <span className="ml-3">Hire</span>
+                                            </button>
+                                        </div>
+                                        <div className="-ml-px w-0 flex-1 flex">
+                                            <button
+                                                onClick={() => handleReject(bid._id)}
+                                                className="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-red-700 font-medium border border-transparent rounded-br-lg hover:bg-red-50"
+                                            >
+                                                <span className="ml-3">Reject</span>
                                             </button>
                                         </div>
                                     </div>

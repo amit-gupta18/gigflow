@@ -30,11 +30,19 @@ async function getBids(req, res) {
 // /api/bids/:bidid/hire
 async function hireBid(req, res) {
     try {
-        const bid = await Bid.findById(req.params.bidid)
+        const bid = await Bid.findById(req.params.bidId)
+        console.log("bid found for hiring " , bid)
         if (!bid) {
             return res.status(404).json({ message: "Bid not found" })
         }
         bid.status = "hired"
+        // update the gig status to assigned as well
+        const gig = await Gig.findById(bid.gigId)
+        if (!gig) {
+            return res.status(404).json({ message: "Gig not found" })
+        }
+        gig.status = "assigned"
+        await gig.save()
         await bid.save()
         res.status(200).json(bid)
     } catch (error) {
@@ -42,4 +50,19 @@ async function hireBid(req, res) {
     }
 }
 
-module.exports = { createBid, getBids, hireBid }
+// /api/bids/:bidId/reject
+async function rejectBid(req, res) {
+    try {
+        const bid = await Bid.findById(req.params.bidId)
+        if (!bid) {
+            return res.status(404).json({ message: "Bid not found" })
+        }
+        bid.status = "rejected"
+        await bid.save()
+        res.status(200).json(bid)
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+module.exports = { createBid, getBids, hireBid, rejectBid }
