@@ -3,6 +3,7 @@ import axiosClient from "../api/axiosClient";
 
 export const loginUser = createAsyncThunk("auth/login", async (data) => {
     const res = await axiosClient.post("/auth/login", data);
+    console.log("Login response:", res.data);
     return res.data.user;
 });
 
@@ -13,6 +14,7 @@ export const registerUser = createAsyncThunk("auth/register", async (data) => {
 
 export const fetchMe = createAsyncThunk("auth/me", async () => {
     const res = await axiosClient.get("/auth/me");
+    console.log("FetchMe response:", res.data);
     return res.data.user;
 });
 

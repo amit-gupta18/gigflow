@@ -36,6 +36,7 @@ async function hireBid(req, res) {
             return res.status(404).json({ message: "Bid not found" })
         }
         bid.status = "hired"
+        
         // update the gig status to assigned as well
         const gig = await Gig.findById(bid.gigId)
         if (!gig) {
@@ -43,6 +44,13 @@ async function hireBid(req, res) {
         }
         gig.status = "assigned"
         await gig.save()
+        
+        // Mark all other bids for this gig as rejected
+        await Bid.updateMany(
+            { gigId: bid.gigId, _id: { $ne: bid._id } },
+            { $set: { status: "rejected" } }
+        )
+        
         await bid.save()
         res.status(200).json(bid)
     } catch (error) {
