@@ -60,7 +60,7 @@ async function getMe(req, res) {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        console.log("User from DB:", { id: user._id, name: user.name, email: user.email });
+        // console.log("User from DB:", { id: user._id, name: user.name, email: user.email });
         res.json({ user: { id: user._id, name: user.name, email: user.email } });
     } catch (error) {
         res.status(500).json({ message: "Server error" });

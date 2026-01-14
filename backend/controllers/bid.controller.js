@@ -31,7 +31,7 @@ async function getBids(req, res) {
 async function hireBid(req, res) {
     try {
         const bid = await Bid.findById(req.params.bidId)
-        console.log("bid found for hiring " , bid)
+        // console.log("bid found for hiring " , bid)
         if (!bid) {
             return res.status(404).json({ message: "Bid not found" })
         }

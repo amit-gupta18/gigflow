@@ -25,7 +25,7 @@ const ViewGig = () => {
                 
                 const bidsResponse = await axiosClient.get(`/bids/${id}`);
                 setBids(bidsResponse.data);
-                console.log("bids response : ", bidsResponse.data);
+                // console.log("bids response : ", bidsResponse.data);
             } catch (err) {
                 console.error("Error fetching bids:", err);
                 setError(err.response?.data?.message || "Failed to fetch bid details");
@@ -86,12 +86,12 @@ const ViewGig = () => {
 
     const isOwner = user && currentGig.ownerId && String(currentGig.ownerId) === String(user.id);
     
-    console.log('Owner check:', { 
-        userId: user?.id, 
-        gigOwnerId: currentGig?.ownerId, 
-        isOwner,
-        gigStatus: currentGig?.status 
-    });
+    // console.log('Owner check:', { 
+    //     userId: user?.id, 
+    //     gigOwnerId: currentGig?.ownerId, 
+    //     isOwner,
+    //     gigStatus: currentGig?.status 
+    // });
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
