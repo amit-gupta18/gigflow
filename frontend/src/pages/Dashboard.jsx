@@ -1,19 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchGigs } from "../redux/gigSlice";
+import axiosClient from "../api/axiosClient";
 import GigCard from "../components/GigCard";
 import SearchBar from "../components/SearchBar";
 
 const Dashboard = () => {
-    const dispatch = useDispatch();
-    const { gigs, loading, error } = useSelector((state) => state.gigs);
+    const [gigs, setGigs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        dispatch(fetchGigs());
-    }, [dispatch]);
+        const fetchGigs = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await axiosClient.get("/gigs");
+                setGigs(response.data.gigs || []);
+            } catch (err) {
+                setError(err.response?.data?.message || "Failed to fetch gigs");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const filteredGigs = gigs.filter((gig) =>
+        fetchGigs();
+    }, []);
+
+    const filteredGigs = gigs?.filter((gig) =>
         gig.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 

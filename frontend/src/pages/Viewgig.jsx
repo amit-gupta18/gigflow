@@ -1,47 +1,82 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchGigById, fetchBids, placeBid, hireBid } from "../redux/gigSlice";
+import axiosClient from "../api/axiosClient";
 
 const ViewGig = () => {
     const { id } = useParams();
-    const dispatch = useDispatch();
-    const { currentGig, bids, loading, error } = useSelector((state) => state.gigs);
     const { user } = useSelector((state) => state.auth);
+
+    const [currentGig, setCurrentGig] = useState(null);
+    const [bids, setBids] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const [bidPrice, setBidPrice] = useState("");
     const [bidMessage, setBidMessage] = useState("");
+    const [bidLoading, setBidLoading] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchGigById(id));
-        dispatch(fetchBids(id));
-    }, [dispatch, id]);
+        const fetchGigData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const [gigResponse, bidsResponse] = await Promise.all([
+                    // axiosClient.get(`/gigs/${id}`),
+                    axiosClient.get(`/bids/${id}`)
+                ]);
+                setCurrentGig(gigResponse.data);
+                setBids(bidsResponse.data);
+            } catch (err) {
+                setError(err.response?.data?.message || "Failed to fetch gig details");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGigData();         
+    }, [id]);
 
     const handlePlaceBid = async (e) => {
         e.preventDefault();
         if (!bidPrice || !bidMessage) return;
-        await dispatch(placeBid({ gigId: id, bidData: { price: Number(bidPrice), message: bidMessage } }));
-        setBidPrice("");
-        setBidMessage("");
+
+        try {
+            setBidLoading(true);
+            const response = await axiosClient.post("/bids", {
+                gigId: id,
+                price: Number(bidPrice),
+                message: bidMessage
+            });
+            setBids([...bids, response.data]);
+            setBidPrice("");
+            setBidMessage("");
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to place bid");
+        } finally {
+            setBidLoading(false);
+        }
     };
 
     const handleHire = async (bidId) => {
-        await dispatch(hireBid({ bidId }));
-        // Optionally re-fetch gig fetching to update status
-        dispatch(fetchGigById(id));
-        dispatch(fetchBids(id)); // To update bids status (rejected/hired)
+        try {
+            await axiosClient.patch(`/bids/${bidId}/hire`);
+            // Re-fetch gig and bids to update status
+            const [gigResponse, bidsResponse] = await Promise.all([
+                axiosClient.get(`/gigs/${id}`),
+                axiosClient.get(`/bids/${id}`)
+            ]);
+            setCurrentGig(gigResponse.data);
+            setBids(bidsResponse.data);
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to hire bidder");
+        }
     };
 
     if (loading || !currentGig) return <div className="text-center mt-10">Loading gig details...</div>;
     if (error) return <div className="text-center mt-10 text-red-500">Error: {error}</div>;
 
-    const isOwner = user && currentGig.userId === user._id; // Assuming backend returns userId in gig object
-    // If backend returns ownerId or similar, adjust. 
-    // Let's assume userId based on common patterns.
-
-    // Actually, checking "api/gigs" response structure would be good, 
-    // but let's assume standard 'userId' or 'owner' field.
-    // If user object has _id, and gig has userId.
+    const isOwner = user && currentGig.userId === user.id;
 
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -155,9 +190,10 @@ const ViewGig = () => {
                             <div className="mt-4">
                                 <button
                                     type="submit"
-                                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    disabled={bidLoading}
+                                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
                                 >
-                                    Submit Bid
+                                    {bidLoading ? "Submitting..." : "Submit Bid"}
                                 </button>
                             </div>
                         </form>
